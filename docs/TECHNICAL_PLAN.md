@@ -2511,8 +2511,13 @@ never collect it.
 
 ### 18.10 Supply chain and signing keys
 
-- Commit `pnpm-lock.yaml`. Build with `pnpm install --frozen-lockfile --ignore-scripts` in CI —
-  `--ignore-scripts` neutralises the dominant npm attack (malicious `postinstall`); Vite and esbuild
+- Commit `pnpm-lock.yaml`. Build with `pnpm install --frozen-lockfile` in CI.
+  **CORRECTED IN PHASE 0:** a blanket `--ignore-scripts` — the usual advice, and what this plan
+  originally specified — **cannot work here, because Electron's `postinstall` is what downloads the
+  ~230 MB runtime binary.** The stricter and actually-workable posture is pnpm's deny-by-default
+  plus an explicit reviewed allowlist in `pnpm-workspace.yaml` (`allowBuilds: electron, esbuild`),
+  with `electron-winstaller` explicitly denied. Historical note: `--ignore-scripts`
+  neutralises the dominant npm attack (malicious `postinstall`); Vite and esbuild
   ship platform binaries as optional dependencies rather than install scripts, so this works, but
   verify once.
 - **Target zero runtime dependencies in the renderer.** Every frontend package is a direct path to
@@ -3248,7 +3253,7 @@ cannot be changed without breaking user-visible state or resetting reputation.
 |---|---|
 | Product display name | `Mind Pause` (user-configurable *display* string in V1 — UI only) |
 | Binary / process name | `mindpause` |
-| macOS bundle identifier | **`io.github.<GITHUB-USERNAME>.MindPause`** — the Flathub-accepted convention for a GitHub-hosted project with no domain, verifiable because you control the account, and it cannot expire the way a domain can. **`<GITHUB-USERNAME>` is the one value still outstanding; Phase 0 cannot close until it is filled in.** Set once, never changed. |
+| macOS bundle identifier | **`io.github.programmer_nur.MindPause`** — FROZEN 2026-09-26. Note the **underscore**: Flathub requires the domain portion convert `-` to `_` (the GitHub user is `programmer-nur`), and the hyphenated form would be rejected at review on a value that is immutable once shipped. The io.github.* form is Flathub-accepted for a GitHub-hosted project with no domain, is verifiable because you control the account, and cannot expire the way a domain can. `scripts/check-identity.mjs` enforces the naming rule mechanically. |
 | Flatpak / `.desktop` app id | the same id, byte-identical — Flathub requires the app id to match the `.desktop` file name |
 | Windows AUMID | `MindPause.Desktop` |
 | Autostart entry name | `MindPause` |
@@ -3708,8 +3713,9 @@ Tick these in order. Anything unticked is a known gap, not an oversight.
 2. ~~Is the maintainer in the US or Canada?~~ **Answered: Bangladesh — Azure Trusted Signing is
    unavailable; Certum's open-source tier is the cheapest path if signing is ever funded.**
 3. ~~GPL-3.0-or-later, or permissive?~~ **Answered: GPL-3.0-or-later. ADR-023 accepted.**
-4. ~~Which reverse-DNS domain do you control?~~ **Answered: `io.github.<GITHUB-USERNAME>.MindPause`.**
-   **Still outstanding: the GitHub username itself.** Phase 0 cannot close without it.
+4. ~~Which reverse-DNS domain do you control?~~ **Answered and FROZEN in Phase 0:
+   `io.github.programmer_nur.MindPause`.** Flathub requires the domain portion convert `-` to `_`,
+   so the hyphenated form would have been rejected at review — on an immutable value.
 5. ~~Is the signing floor acceptable?~~ **Answered: no paid signing in v1.** See §23.3.1 for the
    per-platform cost of that, and R16 for the macOS autostart risk it creates. Revisit at the
    first release review: ~$99 (Apple) + ~€105 (Certum, year 1) then ~$130/yr removes both

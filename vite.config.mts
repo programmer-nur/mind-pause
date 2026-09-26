@@ -7,7 +7,7 @@ const root = import.meta.dirname;
 export default defineConfig({
   root: resolve(root, 'src/renderer'),
   base: './', // loaded over file://, so every asset reference must be relative
-  plugins: [svelte({ configFile: resolve(root, 'svelte.config.js') })],
+  plugins: [svelte({ configFile: resolve(root, 'svelte.config.mjs') })],
   build: {
     outDir: resolve(root, 'dist/renderer'),
     emptyOutDir: true,

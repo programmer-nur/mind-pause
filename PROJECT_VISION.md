@@ -14,7 +14,7 @@
 | Protection cap | **30 minutes** total including extensions (`PROTECTION_HARD_MAX_MS = 1_800_000`). |
 | Displays | **All displays** by default; remains a setting. |
 | Name | **Mind Pause.** Identity strings freeze in Phase 0. |
-| App id | **`io.github.<GITHUB-USERNAME>.MindPause`** — *username still outstanding; it blocks Phase 0.* |
+| App id | **`io.github.programmer_nur.MindPause`** — FROZEN 2026-09-26. Note the **underscore**: Flathub requires the domain portion convert `-` to `_` (the GitHub user is `programmer-nur`), and the hyphenated form would be rejected at review on a value that is immutable once shipped. |
 | Audience | **Myself first**, published as open source. Contributors welcome; `CONTRIBUTING.md` required. |
 
 ---

@@ -92,7 +92,9 @@ const probes = [
   /* ---- negative controls: these MUST NOT error, or the config is simply broken ---- */
   {
     name: 'CONTROL  platform/index.ts may use process.platform',
-    filePath: 'src/main/platform/__lintproof__m.ts',
+    // Must be the EXACT exempted path. lintText() never reads or writes the file — filePath is
+    // used only for config matching — so this probes the real exemption without touching it.
+    filePath: 'src/main/platform/index.ts',
     code: "export const p: string = process.platform;\n",
     expect: null,
   },

@@ -14,9 +14,12 @@ click plays one, then a calm countdown holds the screen for a duration they chos
 
 No account. No backend. No cloud. No telemetry. No network client linked into the binary at all.
 
-**Current state: pre-Phase-0. There is no source code yet** — only the five planning documents and
-`docs/TECHNICAL_PLAN.md`. Phase 0 (see the roadmap) is: scaffold an empty Electron app and get it
-**built, signed, notarized and installed on all three target platforms** before any feature work.
+**Current state: Phase 0 complete on Linux.** The scaffold exists: pure `src/core/`, the platform
+adapter with three implementations, a tray-resident Electron main process, a Svelte diagnostics
+renderer, the four architectural lint rules (proven to fire by `pnpm lint:prove`), the gate scripts,
+and a working Linux AppImage. **Windows and macOS artifacts build in CI but have not been verified
+on real hardware.** Nothing is code-signed (owner decision, TECHNICAL_PLAN §23.3.1). There is no
+pause engine yet — that is Phase 1 onward.
 
 ---
 
@@ -64,9 +67,12 @@ No account. No backend. No cloud. No telemetry. No network client linked into th
 ## Small mechanical rules
 
 - TypeScript `strict`; no `any` in `src/core/**`.
-- `pnpm install --frozen-lockfile --ignore-scripts` — never plain `pnpm install`.
+- `pnpm install --frozen-lockfile`. **Not** `--ignore-scripts`: it blocks Electron's runtime
+  download. Lifecycle scripts are denied by default and allowlisted in `pnpm-workspace.yaml`.
+- TypeScript is pinned to **6.0.3**, not 7.x: `typescript-eslint` throws on TS 7.
 - Do not run `pnpm build` or any packaging step unless asked; they are slow and produce artifacts
-  nobody wants in a working tree.
+  nobody wants in a working tree. (`release/` and `dist/` are gitignored.)
+- `pnpm gates` is cheap and is the thing to run before claiming anything works.
 - Do not commit or push unless asked.
 - When referencing a decision, cite its ADR number — decisions in this project have reasons, and the
   reason is the interesting part.

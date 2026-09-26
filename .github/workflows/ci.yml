@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1' # weekly: advisories land without code changes
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: Gates (lint, types, architecture, tests)
+    runs-on: ubuntu-22.04 # glibc 2.35 floor, per the support matrix
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+
+      # NOT `--ignore-scripts`: Electron's postinstall is what fetches the runtime binary.
+      # Lifecycle scripts are denied by default and allowlisted in pnpm-workspace.yaml.
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Prove the architectural lint rules actually fire
+        run: pnpm run lint:prove
+
+      - name: Zero-egress dependency check (NFR-30)
+        run: pnpm run deps:check
+
+      - name: Identity strings frozen and consistent (23.5)
+        run: pnpm run identity:check
+
+      - name: Unit tests
+        run: pnpm run test
+
+  build:
+    name: Build (${{ matrix.os }})
+    needs: gates
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-latest, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      # CI produces UNSIGNED artifacts and their hashes, deliberately. Signing happens locally
+      # on a machine the maintainer controls, so no key that could push code to existing
+      # installs ever lives in CI secrets (18.10, 23.2). In v1 nothing is signed at all (23.3.1).
+      - name: Build unsigned artifacts
+        run: pnpm run build && npx --no-install electron-builder --publish never
+
+      - name: Checksums
+        shell: bash
+        run: |
+          cd release
+          find . -maxdepth 1 -type f \( -name '*.AppImage' -o -name '*.exe' -o -name '*.dmg' -o -name '*.zip' \) \
+            -exec sha256sum {} \; | tee SHA256SUMS.unsigned || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-${{ matrix.os }}
+          path: |
+            release/*.AppImage
+            release/*.exe
+            release/*.dmg
+            release/SHA256SUMS.unsigned
+          if-no-files-found: warn
+          retention-days: 14

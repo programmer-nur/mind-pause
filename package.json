@@ -43,5 +43,11 @@
     "typescript-eslint": "8.70.1",
     "vite": "8.3.1",
     "vitest": "5.0.2"
-  }
+  },
+  "author": {
+    "name": "programmer-nur",
+    "email": "mohammadnur5480@gmail.com"
+  },
+  "homepage": "https://github.com/programmer-nur/mind-pause",
+  "desktopName": "io.github.programmer_nur.MindPause.desktop"
 }

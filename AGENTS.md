@@ -2,9 +2,10 @@
 
 For any contributor, human or AI. Read this before changing anything.
 
-> **Current state: pre-Phase-0. There is no code yet** — only the planning documents. The commands
-> in §2 describe the scripts Phase 0 must create; they do not work today. Everything else in this
-> file is binding from the first commit.
+> **Current state: Phase 0 complete on Linux.** The scaffold, the four architectural lint rules,
+> the gate scripts and the Linux AppImage all exist and pass. Windows and macOS artifacts are
+> built by CI but have **not** been installed or verified on real hardware yet. There is no pause
+> engine — that is Phase 1 onward.
 
 ---
 
@@ -24,22 +25,40 @@ For any contributor, human or AI. Read this before changing anything.
 
 ## 2. Commands
 
-*(Phase 0 creates these. Until then, this section is a specification for Phase 0.)*
+**Commands marked ✓ exist and pass today. The rest are specified for the phase that adds them.**
 
 ```bash
-pnpm install --frozen-lockfile --ignore-scripts   # never plain `pnpm install` in CI
-pnpm dev                 # Vite + Electron, with the DEBUG safety caps active
-pnpm test                # all Vitest suites
-pnpm test:core           # core/ only — milliseconds, no app, no display, no real clock
-pnpm test:integration    # store, crypto, media, migrations (real fs, temp dirs)
-pnpm test:e2e            # Playwright + _electron
-pnpm fixtures            # regenerate the media fixture corpus with the bundled ffmpeg
-pnpm lint                # ESLint, including the four architectural rules
-pnpm typecheck
-pnpm deps:check          # fails if an HTTP client or socket package is in the graph
-pnpm notices             # regenerate THIRD_PARTY_NOTICES.md
-pnpm build               # unsigned artifacts for the current platform
+pnpm install --frozen-lockfile   # ✓ NOT --ignore-scripts: it blocks Electron's runtime download.
+                                 #   Lifecycle scripts are denied by default and allowlisted
+                                 #   explicitly in pnpm-workspace.yaml — a stricter posture.
+
+pnpm gates               # ✓ everything CI runs. Run this before claiming anything works.
+pnpm lint                # ✓ ESLint, including the four architectural rules
+pnpm lint:prove          # ✓ proves those four rules actually FIRE (with negative controls)
+pnpm typecheck           # ✓ tsc (main) + svelte-check (renderer)
+pnpm deps:check          # ✓ fails if anything in src/ or the runtime graph can reach the network
+pnpm identity:check      # ✓ app id frozen, consistent, and Flathub-legal
+pnpm test                # ✓ Vitest
+pnpm test:core           # ✓ core/ only — milliseconds, no app, no display, no real clock
+pnpm build               # ✓ tsc + vite -> dist/
+pnpm start               # ✓ build, then launch Electron locally
+pnpm dist:linux          # ✓ AppImage -> release/   (also dist:win / dist:mac)
+
+pnpm test:integration    # Phase 2 — store, crypto, migrations (real fs, temp dirs)
+pnpm test:e2e            # Phase 6 — Playwright + _electron
+pnpm fixtures            # Phase 3 — generate the media fixture corpus with the bundled ffmpeg
+pnpm notices             # Phase 8 — regenerate THIRD_PARTY_NOTICES.md
 ```
+
+### Verifying what a machine can actually do
+
+```bash
+"release/Mind Pause-0.0.1.AppImage" --print-probe   # JSON: enforcement level + WHY, tray, paths
+"release/Mind Pause-0.0.1.AppImage" --diagnostics   # the same, in a window
+```
+
+`--print-probe` is the ancestor of `mindpause doctor` (FR-65). Use it instead of guessing what a
+platform supports — and instead of asking a user to describe their desktop.
 
 ### Development safety — non-negotiable, and active from the first shield commit
 

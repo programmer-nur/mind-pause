@@ -1,7 +1,7 @@
 # Packaging (TECHNICAL_PLAN 23.5).
 # appId MUST stay byte-identical to APP_ID in src/core/identity.ts — `pnpm identity:check`
 # asserts it, and fails while the GitHub-username placeholder is still present.
-appId: io.github.PLACEHOLDER-GITHUB-USERNAME.MindPause
+appId: io.github.programmer_nur.MindPause
 productName: Mind Pause
 copyright: Copyright (C) 2026 Mind Pause contributors. GPL-3.0-or-later.
 
@@ -31,13 +31,30 @@ linux:
     Mind Pause plays a short message you recorded yourself, then holds a calm countdown for a
     length of time you chose in advance. Fully offline. No account, no cloud, no telemetry.
     It does not lock your computer and never claims to — you can always end a pause.
+  # Links the running window to the .desktop entry via WM_CLASS. Without it GNOME does not
+  # associate them, which weakens the .desktop fallback entry point (FR-61).
+  syncDesktopName: true
   desktop:
     entry:
-      # The tray is never the only entry point (FR-61). These Actions are a free, zero-dependency
-      # way in on stock GNOME, where no StatusNotifierWatcher may exist at all.
-      Actions: StartPause;
       X-GNOME-UsesNotifications: 'false'
+      # NOTE: `Actions=StartPause;` is deliberately NOT declared yet. electron-builder writes
+      # only the [Desktop Entry] group, so declaring an action without its
+      # [Desktop Action StartPause] group produces a MALFORMED entry that desktop-file-validate
+      # rejects and launchers silently ignore. Phase 5 adds it via an afterPack hook, together
+      # with the `mindpause pause` CLI verb the action needs to invoke.
   executableName: mindpause
+
+appImage:
+  # electron-builder's AppImage default is `Exec=AppRun --no-sandbox %U`, which disables the
+  # Chromium sandbox for every renderer — a real regression against the sandboxed-renderer
+  # control in 18.8. Setting executableArgs REPLACES that default (see AppImageTarget.js).
+  #
+  # VERIFIED on the Tier-1 target (Ubuntu 24.04, GNOME 46, Wayland, with
+  # kernel.apparmor_restrict_unprivileged_userns=1): renderers start fine WITH the sandbox —
+  # 3 renderer processes observed. So the sandbox stays on, and `--no-sandbox` is documented in
+  # the README as a per-user workaround rather than a global downgrade for every user on every
+  # distro. If a supported distro ever genuinely needs it, the answer is Flatpak (V1).
+  executableArgs: []
 
 win:
   target:

@@ -3,9 +3,20 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": [],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client"
+    ],
     "noEmit": true
   },
-  "include": ["src/renderer/**/*.ts", "src/renderer/**/*.svelte", "src/core/**/*.ts"]
+  "include": [
+    "src/renderer/**/*.ts",
+    "src/renderer/**/*.svelte",
+    "src/renderer/**/*.d.ts",
+    "src/core/**/*.ts"
+  ]
 }

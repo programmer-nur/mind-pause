@@ -566,7 +566,7 @@ Immutable once shipped — changing any of these breaks user-visible state or re
 |---|---|
 | Product display name | `Mind Pause` (user-configurable *display* string in V1 — UI only) |
 | Binary / process name | `mindpause` |
-| macOS bundle id / Flatpak app id | **`io.github.<GITHUB-USERNAME>.MindPause`** — Flathub's convention for a GitHub-hosted project with no domain. **The username is still outstanding and blocks Phase 0.** |
+| macOS bundle id / Flatpak app id | **`io.github.programmer_nur.MindPause`** — FROZEN 2026-09-26. Note the **underscore**: Flathub requires the domain portion convert `-` to `_` (the GitHub user is `programmer-nur`), and the hyphenated form would be rejected at review on a value that is immutable once shipped. Enforced by `pnpm identity:check`. |
 | Windows AUMID | `MindPause.Desktop` |
 | Autostart entry name | `MindPause` |
 

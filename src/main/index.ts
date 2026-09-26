@@ -27,6 +27,14 @@ const RENDERER_INDEX = join(app.getAppPath(), 'dist', 'renderer', 'index.html');
 let tray: Tray | undefined;
 let diagnosticsWindow: BrowserWindow | undefined;
 
+/**
+ * Phase 0 verification flags. `--print-probe` is the seed of `mind-pause doctor` (FR-65): it
+ * reports what this machine can actually do, as JSON, with no GUI at all — so CI and a support
+ * request can both get the truth without a human clicking a tray icon.
+ */
+const WANT_PROBE_JSON = process.argv.includes('--print-probe');
+const WANT_DIAGNOSTICS = process.argv.includes('--diagnostics');
+
 /* ------------------------------------------------------------------ single instance */
 
 // Must be Local-namespaced per user, never Global: fast user switching legitimately means two
@@ -51,12 +59,24 @@ async function main(): Promise<void> {
 
   await app.whenReady();
 
+  if (WANT_PROBE_JSON) {
+    const adapter = platformAdapter();
+    const probe = await adapter.probe();
+    process.stdout.write(
+      `${JSON.stringify({ ...probe, paths: { data: adapter.dataDir(), state: adapter.stateDir(), logs: adapter.logDir() }, versions: { app: app.getVersion(), appId: APP_ID, electron: process.versions.electron, chrome: process.versions.chrome } }, null, 2)}\n`,
+    );
+    app.exit(0);
+    return;
+  }
+
   // Tray-resident: no Dock tile on macOS, no window on any platform.
   app.dock?.hide();
 
   hardenSession();
   registerIpc();
   createTray();
+
+  if (WANT_DIAGNOSTICS) await openDiagnostics();
 
   // Never quit because the last window closed — this app lives in the tray.
   app.on('window-all-closed', () => {

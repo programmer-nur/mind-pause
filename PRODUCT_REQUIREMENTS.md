@@ -238,8 +238,8 @@ Answer these before Phase 1; each changes the plan.
    unavailable; Certum's open-source tier is the cheapest path if signing is funded.
 3. ~~GPL-3.0-or-later, or permissive?~~ **Answered: GPL-3.0-or-later. ADR-023 accepted**, which also
    unlocks Certum's open-source certificate.
-4. ~~Which reverse-DNS domain do you control?~~ **Answered: `io.github.<GITHUB-USERNAME>.MindPause`.**
-   **Outstanding: the GitHub username.**
+4. ~~Which reverse-DNS domain do you control?~~ **Answered and FROZEN:
+   `io.github.programmer_nur.MindPause`** (Flathub requires the dash→underscore conversion).
 5. ~~Is the signing floor acceptable?~~ **Answered: no paid signing in v1.** See TECHNICAL_PLAN
    §23.3.1 for what that costs per platform, and R16 for the macOS autostart risk it creates.
 6. ~~60-minute hard maximum, or 30?~~ **Answered: 30 minutes** (`PROTECTION_HARD_MAX_MS = 1_800_000`).
