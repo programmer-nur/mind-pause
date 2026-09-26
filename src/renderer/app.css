@@ -1,0 +1,21 @@
+/* Dark-first is functional, not stylistic: this app runs at 01:00 in a dark room (20.2).
+   Warm near-black rather than pure #000 — pure black smears on OLED and is needlessly harsh. */
+:root {
+  --ground: #0e0f12;
+  --raised: #16181d;
+  --line: #24272e;
+  --text: rgba(255, 255, 255, 0.88);
+  --muted: rgba(255, 255, 255, 0.55);
+  --accent: #5fb3a8; /* exactly one, low-saturation */
+  --warn: #d6a95f;
+  font-family: system-ui, -apple-system, 'Segoe UI Variable', 'Segoe UI', Cantarell, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}

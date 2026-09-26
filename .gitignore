@@ -1,0 +1,7 @@
+node_modules/
+dist/
+release/
+*.log
+.DS_Store
+# transient probe files written by scripts/prove-lint-rules.mjs
+**/__lintproof__*

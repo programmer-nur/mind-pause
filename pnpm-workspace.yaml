@@ -1,0 +1,7 @@
+# Supply-chain posture (TECHNICAL_PLAN 18.10): lifecycle scripts are DENIED by default;
+# this is the explicit, reviewed allowlist. A blanket `--ignore-scripts` cannot work here,
+# because Electron's postinstall is what fetches the ~230 MB runtime binary.
+allowBuilds:
+  electron: true            # postinstall downloads the Electron runtime. Required.
+  esbuild: true             # postinstall selects the platform binary. Required by Vite.
+  electron-winstaller: false # Squirrel.Windows. We ship NSIS (23.5). Deliberately not built.

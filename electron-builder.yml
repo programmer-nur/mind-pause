@@ -1,0 +1,70 @@
+# Packaging (TECHNICAL_PLAN 23.5).
+# appId MUST stay byte-identical to APP_ID in src/core/identity.ts — `pnpm identity:check`
+# asserts it, and fails while the GitHub-username placeholder is still present.
+appId: io.github.PLACEHOLDER-GITHUB-USERNAME.MindPause
+productName: Mind Pause
+copyright: Copyright (C) 2026 Mind Pause contributors. GPL-3.0-or-later.
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - package.json
+  - '!**/*.map'
+
+extraResources:
+  - from: resources
+    to: resources
+    filter: ['**/*']
+
+# No auto-updater is configured, deliberately (ADR-019). Publishing is manual.
+publish: null
+
+linux:
+  target: [AppImage]
+  category: Utility
+  icon: resources/icons/icon.png
+  synopsis: A deliberate pause between an impulse and acting on it
+  description: >-
+    Mind Pause plays a short message you recorded yourself, then holds a calm countdown for a
+    length of time you chose in advance. Fully offline. No account, no cloud, no telemetry.
+    It does not lock your computer and never claims to — you can always end a pause.
+  desktop:
+    entry:
+      # The tray is never the only entry point (FR-61). These Actions are a free, zero-dependency
+      # way in on stock GNOME, where no StatusNotifierWatcher may exist at all.
+      Actions: StartPause;
+      X-GNOME-UsesNotifications: 'false'
+  executableName: mindpause
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+  icon: resources/icons/icon.png
+  # No signing configured: owner decision, no paid signing in v1 (23.3.1).
+  # Consequence: SmartScreen warns, and Smart App Control hard-blocks on some Win11 machines.
+  signAndEditExecutable: false
+
+nsis:
+  oneClick: false
+  perMachine: false # per-user install: NO admin at install or run (15.6)
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: false
+  createStartMenuShortcut: true
+  # An app that deliberately resists being closed has a heightened obligation to be trivially
+  # removable. Phase 5 adds the uninstall hook that clears the autostart entry and state dir.
+  deleteAppDataOnUninstall: false
+
+mac:
+  target: [dmg]
+  category: public.app-category.healthcare-fitness
+  icon: resources/icons/icon.png
+  darkModeSupport: true
+  # Unsigned and un-notarized in v1 (23.3.1). Phase 0 verifies empirically whether an
+  # ad-hoc-signed bundle in /Applications can still register a login item (R16).
+  identity: null
+  extendInfo:
+    LSUIElement: true # tray-resident: no Dock tile, no main menu bar (16.1)
